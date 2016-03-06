@@ -15,7 +15,6 @@ class Pages extends Migration
         Schema::create('pages', function (Blueprint $table) {
             $table->increments('id');
             $table->longText('texte');
-            $table->integer('numPage');
             $table->integer("story_id");
             $table->timestamps();
         });

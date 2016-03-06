@@ -10,15 +10,17 @@
 | and give it the controller to call when that URI is requested.
 |
 */
-Route::get('/', function () {
-    return view('welcome');
-});
 
+
+Route::post('/api/v1/user', 'UserController@store');
 
 Route::group(array('prefix' => 'api/v1', 'middleware' => 'auth.basic'), function()
 {
-  Route::resource('story', 'StoryController');
-  Route::resource('user', 'UserController');
+  Route::resource('story', 'StoryController', ['only' => ['store', 'show', 'update', 'destroy']]);
+  Route::resource('user', 'UserController', ['only' => ['show', 'update', 'destroy']]);
+  Route::resource('page', 'PageController', ['only' => ['show', 'update', 'destroy']]);
+  Route::post('story/{storyId}/page', 'PageController@store');
+
 });
 
 /*

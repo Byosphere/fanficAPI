@@ -3,30 +3,14 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-
+use App\Story;
+use App\Page;
 use App\Http\Requests;
+use Response;
+use Validator;
 
 class StoryController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index()
-    {
-        //
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
 
     /**
      * Store a newly created resource in storage.
@@ -36,7 +20,33 @@ class StoryController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $user = \Auth::user();
+
+        $regles = array(
+            'titre' => 'required|min:5|max:40',
+            'ref' => 'required|min:5|max:40'
+        );
+
+        $validation = Validator::make($request->all(), $regles);
+
+        if ($validation->fails()) {
+
+            return Response::json(array(
+                'error' => true,
+                'message' => $validation->errors()->all()
+            ));
+
+        } else {
+
+            $story = new Story();
+            $story->titre = $request->get('titre');
+            $story->reference = $request->get('ref');
+            $user->stories()->save($story);
+
+            return Response::json(array(
+                'error' => false, 'message' => "Story enregistrée !"));
+
+        }
     }
 
     /**
@@ -47,18 +57,15 @@ class StoryController extends Controller
      */
     public function show($id)
     {
-        //
-    }
+        try {
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
+            $story = Story::findOrfail($id);
+            return Response::json(array('error' => false, 'story' => $story->toArray(), 'pages' => $story->pages->toArray()));
+
+        } catch (\Exception $e) {
+
+            return Response::json(array('error' => true, 'message' => $e->getMessage()));
+        }
     }
 
     /**
@@ -70,9 +77,48 @@ class StoryController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
-    }
+        $user = \Auth::user();
+        $regles = array(
+            'titre' => 'min:5|max:40',
+            'ref' => 'min:5|max:40'
+        );
 
+        $validation = Validator::make($request->all(), $regles);
+
+        if ($validation->fails()) {
+
+            return Response::json(array(
+                'error' => true,
+                'message' => $validation->errors()->all()
+            ));
+
+        } else {
+
+            try {
+
+                $story = Story::findOrfail($id);
+
+                if($user->id != $story->user_id)
+                    throw new \Exception("Non authorisé", 1);
+
+                if($request->get('titre'))
+                    $story->titre = $request->get('titre');
+
+                if($request->get('ref'))
+                    $story->reference = $request->get('ref');
+
+                $user->stories()->save($story);
+
+                return Response::json(array(
+                    'error' => false, 'message' => "Story modifiée !"));
+
+            } catch (\Exception $e) {
+
+                return Response::json(array(
+                    'error' => true, 'message' => $e->getMessage()));
+            }
+        }
+    }
     /**
      * Remove the specified resource from storage.
      *
@@ -81,6 +127,26 @@ class StoryController extends Controller
      */
     public function destroy($id)
     {
-        //
+        try {
+
+            $story = Story::findOrfail($id);
+
+            if(\Auth::user()->id != $story->user_id)
+                throw new \Exception("Non authorisé", 1);
+
+            foreach ($story->pages as $page) {
+
+                $page->delete();
+            }
+            $story->delete();
+            return Response::json(array('error' => false, 'message' => "la story a bien été supprimée"));
+
+        } catch (\Exception $e) {
+
+            return Response::json(array(
+                'error' => true, 'message' => $e->getMessage()));
+        }
     }
+
+    
 }

@@ -11,25 +11,6 @@ use Hash;
 
 class UserController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index()
-    {
-        //n'existe pas pour l'api
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //n'existe pas pour l'api
-    }
 
     /**
      * Store a newly created resource in storage.
@@ -80,23 +61,12 @@ class UserController extends Controller
         try {
 
             $user = User::findOrfail($id);
-            return Response::json(array('error' => false, 'user' => $user->toArray()));
+            return Response::json(array('error' => false, 'user' => $user->toArray(), 'followed' => $user->lectures->toArray(), 'writings' => $user->stories->toArray()));
 
         } catch (\Exception $e) {
 
             return Response::json(array('error' => true, 'message' => $e->getMessage()));
         }
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //n'existe pas pour l'api
     }
 
     /**
@@ -112,7 +82,9 @@ class UserController extends Controller
         $regles = array(
             'name' => 'min:5|max:40',
             'email' => 'email',
-            'pass' => 'min:5|max:40'
+            'pass' => 'min:5|max:40',
+            'follow' => 'numeric',
+            'page' => 'numeric'
         );
 
         $validation = Validator::make($request->all(), $regles);
@@ -130,6 +102,9 @@ class UserController extends Controller
 
                 $user = User::findOrfail($id);
 
+                if(\Auth::User()->id != $user->id)
+                    throw new Exception("Non authorisé", 1);
+
                 if($request->get('name'))
                     $user->name = $request->get('name');
 
@@ -138,6 +113,28 @@ class UserController extends Controller
 
                 if($request->get('pass'))
                     $user->password = Hash::make($request->get('pass'));
+
+                if($request->get('follow')) {
+
+                    $storyFollow = \App\Story::findOrfail($request->get('follow'));
+                    $existing = false;
+
+                    foreach ($user->lectures()->get() as $story) {
+
+                        if ($story->id == $storyFollow->id)
+                            $existing = true;
+                    }
+
+                    if($request->get('page') && $existing)
+                            $user->lectures()->updateExistingPivot($storyFollow->id, ['pageActuelle' => $request->get('page')]);
+
+                    if($request->get('page') && !$existing)
+                            $user->lectures()->attach($storyFollow->id, ['pageActuelle' => $request->get('page')]);
+
+                    if(!$request->get('page') && !$existing)
+                            $user->lectures()->attach($storyFollow->id);
+
+                }
 
                 $user->save();
 
@@ -167,7 +164,17 @@ class UserController extends Controller
         try {
 
             $user = User::findOrfail($id);
-            return Response::json(array('error' => false, 'message' => $user->name+" a bien été supprimé"));
+
+            if(\Auth::User()->id != $user->id)
+                throw new \Exception("Non authorisé", 1);
+
+            foreach ($user->lectures()->get() as $story ) {
+
+                dd($story->titre);
+            }
+
+            $user->delete();
+            return Response::json(array('error' => false, 'message' => "l'utilisateur a bien été supprimé"));
 
         } catch (\Exception $e) {
 
