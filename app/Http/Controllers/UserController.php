@@ -12,6 +12,37 @@ use Hash;
 class UserController extends Controller
 {
 
+    public function connect(Request $request)
+    {
+        $regles = array(
+            'email' => 'required|email',
+            'pass' => 'required|min:5|max:40'
+        );
+        $validation = Validator::make($request->all(), $regles);
+
+        if ($validation->fails()) {
+
+            return Response::json(array(
+                'error' => true,
+                'message' => $validation->errors()->all()
+            ));
+
+        } else {
+
+            if(\Auth::attempt(['email' => $request->get('email'), 'password' => $request->get('pass')])) {
+
+                return Response::json(array(
+                    'error' => false, 'user' => \Auth::user()->toArray()));
+            } else {
+
+                return Response::json(array(
+                    'error' => true,
+                    'message' => "mauvaise combinaison email/mot de passe"
+                ));
+            }
+
+        }
+    }
     /**
      * Store a newly created resource in storage.
      *
@@ -61,7 +92,11 @@ class UserController extends Controller
         try {
 
             $user = User::findOrfail($id);
-            return Response::json(array('error' => false, 'user' => $user->toArray(), 'followed' => $user->lectures->toArray(), 'writings' => $user->stories->toArray()));
+            $followed = array();
+            $user->lectures;
+            $user->stories;
+            
+            return Response::json(array('error' => false, 'user' => $user->toArray()));
 
         } catch (\Exception $e) {
 

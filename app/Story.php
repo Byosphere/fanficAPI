@@ -20,6 +20,6 @@ class Story extends Model
 
     public function lecteurs() {
 
-        return $this->belongsToMany('App\User');
+        return $this->belongsToMany('App\User')->withPivot('pageActuelle');
     }
 }

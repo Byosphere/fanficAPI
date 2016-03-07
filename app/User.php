@@ -26,11 +26,11 @@ class User extends Authenticatable
 
     public function stories() {
 
-        return $this->hasMany('App\Story', 'user_id');
+        return $this->hasMany('App\Story');
     }
 
     public function lectures() {
 
-        return $this->belongsToMany('App\Story');
+        return $this->belongsToMany('App\Story')->withPivot('pageActuelle');
     }
 }

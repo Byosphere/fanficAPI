@@ -13,8 +13,9 @@
 
 
 Route::post('/api/v1/user', 'UserController@store');
+Route::post('/api/v1/user/connect', 'UserController@connect');
 
-Route::group(array('prefix' => 'api/v1', 'middleware' => 'auth.basic'), function()
+Route::group(array('prefix' => 'api/v1', 'middleware' => 'auth.basic.once'), function()
 {
   Route::resource('story', 'StoryController', ['only' => ['store', 'show', 'update', 'destroy']]);
   Route::resource('user', 'UserController', ['only' => ['show', 'update', 'destroy']]);
