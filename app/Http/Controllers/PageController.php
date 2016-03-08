@@ -37,7 +37,10 @@ class PageController extends Controller
             } else {
 
                 $page->texte = $request->get('texte');
+                $story->nbPages++;
                 $story->pages()->save($page);
+                $story->save();
+
                 return Response::json(array(
                     'error' => false, 'message' => "Page enregistrée !"));
 
@@ -90,11 +93,14 @@ class PageController extends Controller
     }
 
 
-    public function destroy($storyId, $pageId)
+    public function destroy($pageId)
     {
         $this->authentificate($pageId);
         $page = Page::find($pageId);
+        $story = $page->story();
+        $story->nbPages--;
         $page->delete();
+        $story->save();
     }
 
     private function authentificate($pageId) {

@@ -15,8 +15,10 @@ class Stories extends Migration
         Schema::create('stories', function (Blueprint $table) {
             $table->increments('id');
             $table->integer("user_id");
+            $table->string("author");
             $table->string("titre");
             $table->string("reference");
+            $table->integer("nbPages");
             $table->timestamps();
         });
     }

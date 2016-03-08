@@ -41,6 +41,8 @@ class StoryController extends Controller
             $story = new Story();
             $story->titre = $request->get('titre');
             $story->reference = $request->get('ref');
+            $story->author = $user->name;
+            
             $user->stories()->save($story);
 
             return Response::json(array(
@@ -80,7 +82,8 @@ class StoryController extends Controller
         $user = \Auth::user();
         $regles = array(
             'titre' => 'min:5|max:40',
-            'ref' => 'min:5|max:40'
+            'ref' => 'min:5|max:40',
+            'nbPages' => 'numeric'
         );
 
         $validation = Validator::make($request->all(), $regles);
@@ -106,6 +109,9 @@ class StoryController extends Controller
 
                 if($request->get('ref'))
                     $story->reference = $request->get('ref');
+
+                if($request->get('nbPages'))
+                    $story->nbPages = $request->get('nbPages');
 
                 $user->stories()->save($story);
 
@@ -148,5 +154,5 @@ class StoryController extends Controller
         }
     }
 
-    
+
 }

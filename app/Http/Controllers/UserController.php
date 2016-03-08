@@ -95,7 +95,7 @@ class UserController extends Controller
             $followed = array();
             $user->lectures;
             $user->stories;
-            
+
             return Response::json(array('error' => false, 'user' => $user->toArray()));
 
         } catch (\Exception $e) {
@@ -138,7 +138,7 @@ class UserController extends Controller
                 $user = User::findOrfail($id);
 
                 if(\Auth::User()->id != $user->id)
-                    throw new Exception("Non authorisé", 1);
+                    throw new \Exception("Non authorisé", 1);
 
                 if($request->get('name'))
                     $user->name = $request->get('name');

@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Story extends Model
 {
-    protected $fillable = ['titre', 'reference'];
+    protected $fillable = ['titre', 'reference', 'nbPages'];
 
     public function author(){
 
