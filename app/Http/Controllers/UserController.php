@@ -54,7 +54,7 @@ class UserController extends Controller
 
         $regles = array(
             'name' => 'required|min:5|max:40',
-            'email' => 'required|email',
+            'email' => 'required|email|unique:users',
             'pass' => 'required|min:5|max:40'
         );
 
@@ -76,7 +76,7 @@ class UserController extends Controller
             $user->save();
 
             return Response::json(array(
-                'error' => false, 'message' => "Utilisateur enregistré !"));
+                'error' => false, 'user' => $user));
 
         }
     }
@@ -160,8 +160,18 @@ class UserController extends Controller
                             $existing = true;
                     }
 
-                    if($request->get('page') && $existing)
+                    if($request->get('page') && $existing) {
+
+                        if($request->get('page') < 0) {
+
+                            $user->lectures()->detach($storyFollow->id);
+
+                        } else {
                             $user->lectures()->updateExistingPivot($storyFollow->id, ['pageActuelle' => $request->get('page')]);
+                        }
+
+                    }
+
 
                     if($request->get('page') && !$existing)
                             $user->lectures()->attach($storyFollow->id, ['pageActuelle' => $request->get('page')]);

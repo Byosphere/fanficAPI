@@ -17,6 +17,7 @@ Route::post('/api/v1/user/connect', 'UserController@connect');
 
 Route::group(array('prefix' => 'api/v1', 'middleware' => 'auth.basic.once'), function()
 {
+    Route::get('story/explore', 'StoryController@explore');
     Route::resource('story', 'StoryController', ['only' => ['store', 'show', 'update', 'destroy']]);
     Route::resource('user', 'UserController', ['only' => ['show', 'update', 'destroy']]);
     Route::resource('page', 'PageController', ['only' => ['show', 'update', 'destroy']]);

@@ -12,6 +12,36 @@ use Validator;
 class StoryController extends Controller
 {
 
+
+    public function explore()
+    {
+        $user = \Auth::user();
+        $listStory = array();
+        foreach (Story::get() as $item) {
+
+            $exist = false;
+            foreach ($user->stories as $story) {
+                if($story->id == $item->id) {
+
+                    $exist = true;
+                }
+            }
+
+            foreach ($user->lectures as $story) {
+
+                if($story->id == $item->id) {
+
+                    $exist = true;
+                }
+            }
+
+            if (!$exist) {
+                $listStory[] = $item;
+            }
+
+        }
+        return Response::json(array('error' => false, 'stories' => $listStory));
+    }
     /**
      * Store a newly created resource in storage.
      *
@@ -42,7 +72,7 @@ class StoryController extends Controller
             $story->titre = $request->get('titre');
             $story->reference = $request->get('ref');
             $story->author = $user->name;
-            
+
             $user->stories()->save($story);
 
             return Response::json(array(
