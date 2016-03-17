@@ -17,13 +17,13 @@ class DatabaseSeeder extends Seeder
             'password' => Hash::make('test1')
         ));
 
-        $user1 = \App\User::create(array(
+        $user2 = \App\User::create(array(
             'name' => 'Michel',
             'email' => 'truc@gmail.com',
             'password' => Hash::make('test1')
         ));
 
-        $user1 = \App\User::create(array(
+        $user2 = \App\User::create(array(
             'name' => 'Gerard',
             'email' => 'gege@gmail.com',
             'password' => Hash::make('test1')

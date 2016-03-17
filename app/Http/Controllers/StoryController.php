@@ -21,13 +21,6 @@ class StoryController extends Controller
 
             $exist = false;
             foreach ($user->stories as $story) {
-                if($story->id == $item->id) {
-
-                    $exist = true;
-                }
-            }
-
-            foreach ($user->lectures as $story) {
 
                 if($story->id == $item->id) {
 
@@ -36,6 +29,7 @@ class StoryController extends Controller
             }
 
             if (!$exist) {
+                $item->lecteurs;
                 $listStory[] = $item;
             }
 
@@ -76,7 +70,7 @@ class StoryController extends Controller
             $user->stories()->save($story);
 
             return Response::json(array(
-                'error' => false, 'message' => "Story enregistrée !"));
+                'error' => false, 'story' => $story));
 
         }
     }

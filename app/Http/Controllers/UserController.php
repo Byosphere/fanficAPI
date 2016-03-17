@@ -90,11 +90,22 @@ class UserController extends Controller
     public function show($id)
     {
         try {
-
+            $connectedUser = \Auth::user();
             $user = User::findOrfail($id);
             $followed = array();
             $user->lectures;
             $user->stories;
+            foreach ($user->stories as $story) {
+
+                $followed = false;
+                foreach ($connectedUser->lectures as $lecture) {
+                    if($lecture->id == $story->id)
+                        $followed = true;
+                }
+                $story->followed = $followed;
+
+            }
+
 
             return Response::json(array('error' => false, 'user' => $user->toArray()));
 
@@ -182,9 +193,10 @@ class UserController extends Controller
                 }
 
                 $user->save();
+                $user->lectures;
 
                 return Response::json(array(
-                    'error' => false, 'message' => "Utilisateur mis à jour"));
+                    'error' => false, 'user' => $user));
 
             } catch(\Exception $e) {
 
